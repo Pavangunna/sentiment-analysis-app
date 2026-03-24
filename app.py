@@ -1,29 +1,39 @@
 import streamlit as st
-import pickle
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing.sequence import pad_sequences
 
-# Load files
-model = load_model("sentiment_model.h5")
-tokenizer = pickle.load(open("tokenizer.pkl", "rb"))
-le = pickle.load(open("label_encoder.pkl", "rb"))
+# Page configuration
+st.set_page_config(page_title="Sentiment Analysis App", page_icon="💬")
 
-# Prediction function
+# Title
+st.title("💬 Sentiment Analysis App")
+st.write("Enter a sentence to check whether it is Positive, Negative, or Neutral")
+
+# Prediction function (lightweight, no TensorFlow)
 def predict_sentiment(text):
-    seq = tokenizer.texts_to_sequences([text])
-    padded = pad_sequences(seq, maxlen=100)
-    result = model.predict(padded)
-    label = result.argmax()
-    return le.inverse_transform([label])[0]
+    text = text.lower()
 
-# UI
-st.title("Sentiment Analysis App")
+    positive_words = ["good", "great", "amazing", "excellent", "love", "awesome", "happy"]
+    negative_words = ["bad", "worst", "poor", "hate", "terrible", "awful", "sad"]
 
-user_input = st.text_input("Enter text")
-
-if st.button("Predict"):
-    if user_input:
-        result = predict_sentiment(user_input)
-        st.write("Sentiment:", result)
+    if any(word in text for word in positive_words):
+        return "Positive 😊"
+    elif any(word in text for word in negative_words):
+        return "Negative 😞"
     else:
-        st.write("Please enter text")
+        return "Neutral 😐"
+
+# User input
+user_input = st.text_area("✍️ Enter your text here:")
+
+# Button action
+if st.button("🔍 Analyze Sentiment"):
+    if user_input.strip() != "":
+        result = predict_sentiment(user_input)
+
+        st.subheader("Result:")
+        st.success(result)
+    else:
+        st.warning("⚠️ Please enter some text")
+
+# Footer
+st.markdown("---")
+st.caption("Built using Streamlit 🚀")
